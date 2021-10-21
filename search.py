@@ -16,8 +16,10 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+from copy import deepcopy
 
 import util
+from game import Directions
 
 class SearchProblem:
     """
@@ -61,7 +63,6 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -70,7 +71,40 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
+def getNextPaths(problem, currentPath, expandedStates: list or None) -> (list, bool):
+    """
+    currentPath: list of successors in order
+    Returns a tuple (nextPaths, goalReached)
+
+    If goal reached, it means the 'currentPath' is a path that reaches the goal
+    """
+
+    # 1. Check if last successor of path reached the goal and return None, True if so
+    # 2.
+
+    nextPaths = list()
+
+    if currentPath is None:
+        currentPath = list()
+        stateToExpand = problem.getStartState()
+    else:
+        stateToExpand = currentPath[-1][0]
+
+    # Check if the state of the last successor of the path is the goal
+    if problem.isGoalState(stateToExpand):
+        return list(), True
+
+    if stateToExpand not in expandedStates:
+        for successor in problem.getSuccessors(stateToExpand):
+            nextPath = deepcopy(currentPath)
+            nextPath.append(successor)
+            nextPaths.append(nextPath)
+
+        expandedStates.append(stateToExpand)
+
+    return nextPaths, False
 
 def depthFirstSearch(problem):
     """
@@ -87,17 +121,87 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    fringe = util.Stack()
+    actions = list()
+    expandedStates = list()
+
+    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
+
+    for nextPath in nextPaths:
+        fringe.push(nextPath)
+
+    while not (fringe.isEmpty() or foundGoal):
+
+        currentPath = fringe.pop()
+
+        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
+
+        if foundGoal:
+            actions = [i[1] for i in currentPath]
+        else:
+            for nextPath in nextPaths:
+                fringe.push(nextPath)
+
+    return actions
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.Queue()
+    actions = list()
+    expandedStates = list()
+
+    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
+
+    for nextPath in nextPaths:
+        fringe.push(nextPath)
+
+    while not (fringe.isEmpty() or foundGoal):
+        currentPath = fringe.pop()
+
+        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
+
+        if foundGoal:
+            actions = [i[1] for i in currentPath]
+        else:
+            for nextPath in nextPaths:
+                fringe.push(nextPath)
+
+    return actions
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """Search the shallowest nodes in the search tree first."""
+    fringe = util.PriorityQueue()
+    actions = list()
+    expandedStates = list()
+
+    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
+
+    for nextPath in nextPaths:
+        fringe.push(nextPath, getPathCost(nextPath))
+
+    while not (fringe.isEmpty() or foundGoal):
+        currentPath = fringe.pop()
+
+        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
+
+        if foundGoal:
+            actions = [i[1] for i in currentPath]
+        else:
+            for nextPath in nextPaths:
+                fringe.push(nextPath, getPathCost(nextPath))
+
+    return actions
+
+def getPathCost(path: list):
+    """
+    Calculates the cumulative path cost to get to destination. Used by the uniformCostSearch
+    """
+
+    edgeCosts = [successor[2] for successor in path]
+    return sum(edgeCosts)
 
 def nullHeuristic(state, problem=None):
     """
@@ -110,7 +214,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
-
 
 # Abbreviations
 bfs = breadthFirstSearch
