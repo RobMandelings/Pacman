@@ -106,6 +106,29 @@ def getNextPaths(problem, currentPath, expandedStates: list or None) -> (list, b
 
     return nextPaths, False
 
+def graphSearch(problem, fringe):
+    actions = list()
+    expandedStates = list()
+
+    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
+
+    for nextPath in nextPaths:
+        fringe.push(nextPath)
+
+    while not (fringe.isEmpty() or foundGoal):
+
+        currentPath = fringe.pop()
+
+        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
+
+        if foundGoal:
+            actions = [i[1] for i in currentPath]
+        else:
+            for nextPath in nextPaths:
+                fringe.push(nextPath)
+
+    return actions
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -123,77 +146,17 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
 
     fringe = util.Stack()
-    actions = list()
-    expandedStates = list()
-
-    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
-
-    for nextPath in nextPaths:
-        fringe.push(nextPath)
-
-    while not (fringe.isEmpty() or foundGoal):
-
-        currentPath = fringe.pop()
-
-        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
-
-        if foundGoal:
-            actions = [i[1] for i in currentPath]
-        else:
-            for nextPath in nextPaths:
-                fringe.push(nextPath)
-
-    return actions
+    return graphSearch(problem, fringe)
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
     fringe = util.Queue()
-    actions = list()
-    expandedStates = list()
-
-    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
-
-    for nextPath in nextPaths:
-        fringe.push(nextPath)
-
-    while not (fringe.isEmpty() or foundGoal):
-        currentPath = fringe.pop()
-
-        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
-
-        if foundGoal:
-            actions = [i[1] for i in currentPath]
-        else:
-            for nextPath in nextPaths:
-                fringe.push(nextPath)
-
-    return actions
+    return graphSearch(problem, fringe)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
     """Search the shallowest nodes in the search tree first."""
-    fringe = util.PriorityQueue()
-    actions = list()
-    expandedStates = list()
-
-    nextPaths, foundGoal = getNextPaths(problem, None, expandedStates)
-
-    for nextPath in nextPaths:
-        fringe.push(nextPath, getPathCost(nextPath))
-
-    while not (fringe.isEmpty() or foundGoal):
-        currentPath = fringe.pop()
-
-        nextPaths, foundGoal = getNextPaths(problem, currentPath, expandedStates)
-
-        if foundGoal:
-            actions = [i[1] for i in currentPath]
-        else:
-            for nextPath in nextPaths:
-                fringe.push(nextPath, getPathCost(nextPath))
-
-    return actions
+    fringe = util.PriorityQueueWithFunction(lambda x: problem.getCostOfActions([i[1] for i in x]))
+    return graphSearch(problem, fringe)
 
 def getPathCost(path: list):
     """
