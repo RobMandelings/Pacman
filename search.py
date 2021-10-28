@@ -21,6 +21,7 @@ from copy import deepcopy
 import util
 from game import Directions
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -63,6 +64,7 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
+
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -72,6 +74,7 @@ def tinyMazeSearch(problem):
     s = Directions.SOUTH
     w = Directions.WEST
     return [s, s, w, s, w, w, s, w]
+
 
 def getNextPaths(problem, currentPath, expandedStates: list or None) -> (list, bool):
     """
@@ -106,6 +109,7 @@ def getNextPaths(problem, currentPath, expandedStates: list or None) -> (list, b
 
     return nextPaths, False
 
+
 def graphSearch(problem, fringe):
     actions = list()
     expandedStates = list()
@@ -129,6 +133,7 @@ def graphSearch(problem, fringe):
 
     return actions
 
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -148,15 +153,21 @@ def depthFirstSearch(problem):
     fringe = util.Stack()
     return graphSearch(problem, fringe)
 
+
 def breadthFirstSearch(problem):
     fringe = util.Queue()
     return graphSearch(problem, fringe)
 
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     """Search the shallowest nodes in the search tree first."""
+
+    # PriorityQueueWithFunction takes the one with the lowest priority (e.g cost) first, instead of the
+    # highest
     fringe = util.PriorityQueueWithFunction(lambda x: problem.getCostOfActions([i[1] for i in x]))
     return graphSearch(problem, fringe)
+
 
 def getPathCost(path: list):
     """
@@ -166,6 +177,7 @@ def getPathCost(path: list):
     edgeCosts = [successor[2] for successor in path]
     return sum(edgeCosts)
 
+
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -173,10 +185,12 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+
 
 # Abbreviations
 bfs = breadthFirstSearch
