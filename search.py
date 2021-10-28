@@ -155,6 +155,9 @@ def depthFirstSearch(problem):
 
 
 def breadthFirstSearch(problem):
+    """
+    Returns list of actions after the search has been completed
+    """
     fringe = util.Queue()
     return graphSearch(problem, fringe)
 

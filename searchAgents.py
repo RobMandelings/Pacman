@@ -428,19 +428,25 @@ def cornersHeuristic(state, problem):
     # Only take heuristics of the corners still needed to visit
     unvisitedCorners = [corner[0] for corner in state.corners if corner[1] is False]
 
+    heuristic = trackLocationsHeuristic(initialPos=state.pacmanPosition, locationsToTrack=unvisitedCorners)
+
+    return heuristic  # Default to trivial solution
+
+
+def trackLocationsHeuristic(initialPos, locationsToTrack):
+    """
+    Universal heuristic both used by the cornersHeuristic and foodHeuristic
+    """
     heuristics = list()
 
-    currentPos = state.pacmanPosition
-    while not len(unvisitedCorners) == 0:
-        minHeuristic = selectMinManhattanHeuristic(currentPos, unvisitedCorners)
+    currentPos = initialPos
+    while not len(locationsToTrack) == 0:
+        minHeuristic = selectMinManhattanHeuristic(currentPos, locationsToTrack)
         currentPos = minHeuristic[0]
         heuristics.append(minHeuristic[1])
-        unvisitedCorners = [corner for corner in unvisitedCorners if corner != minHeuristic[0]]
+        locationsToTrack = [corner for corner in locationsToTrack if corner != minHeuristic[0]]
 
-    heuristic = sum(heuristics)
-
-    "*** YOUR CODE HERE ***"
-    return heuristic  # Default to trivial solution
+    return sum(heuristics)
 
 
 def selectMinManhattanHeuristic(currentPos, otherPositions):
@@ -569,7 +575,29 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+
+    foodLocations = list()
+
+    for x in range(foodGrid.width):
+        for y in range(foodGrid.height):
+            isFood = foodGrid[x][y]
+            if isFood:
+                foodLocations.append((x, y))
+
+    heuristics = list()
+    for foodLocation in foodLocations:
+        # The initial heuristic to move towards the food
+        initialFoodMovementHeuristic = manhattanHeuristicByGoalPos(position, foodLocation)
+
+        # Heuristic which adds the initialFoodMovementHeuristic to the trackLocationsHeuristic from the food
+        heuristics.append(trackLocationsHeuristic(initialPos=foodLocation,
+                                                  locationsToTrack=foodLocations) + initialFoodMovementHeuristic)
+
+    if len(heuristics) == 0:
+        return 0
+    else:
+        # Take the most optimistic heuristic
+        return min(heuristics)
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -600,9 +628,8 @@ class ClosestDotSearchAgent(SearchAgent):
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = search.breadthFirstSearch(problem)
+        return actions
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -638,8 +665,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x, y = state
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # If there is food at the given pacman's location, you are done
+        if self.food[x][y] is True:
+            return True
+        else:
+            return False
 
 
 def mazeDistance(point1, point2, gameState):
